@@ -17,7 +17,7 @@ from django.core.cache import cache
 @api_view(['GET'])
 def city_list(request, format=None):
     '''
-
+    Return list of all cities in the database
     '''
     if request.method == 'GET':
         city_objects_list = cache_or_db(City.objects.all, 'city_objects_list')
@@ -27,6 +27,9 @@ def city_list(request, format=None):
 
 @api_view(['GET'])
 def city_detail(request, pk, format=None):
+    '''
+    Return detail of the selected city
+    '''
     # TODO: it can be cleaner #1
     if request.method == 'GET':
         try:
@@ -40,8 +43,10 @@ def city_detail(request, pk, format=None):
 
 @api_view(['GET'])
 def city_weather_detail(request, pk, format=None):
+    '''
+    Return current weather of the selected city.
+    '''
     # TODO: it can be cleaner #1
-
     # Get City Name From Db or cache
     if request.method == 'GET':
         try:
@@ -81,10 +86,11 @@ def city_weather_detail(request, pk, format=None):
         serializer = WeatherSerializer(weather)
         return Response(serializer.data)
 
-    # Weahter of city
-
 
 def cache_or_db(query: callable, key_name: str, new_timeout=True, **kwargs):
+    '''
+    A helper function that makes decisions read data from cache or from the database.
+    '''
     data = cache.get(key_name)
     if not data:
         data = query(**kwargs)
