@@ -1,8 +1,6 @@
-from datetime import datetime, timedelta
-from django.http.response import JsonResponse
+from datetime import timedelta
 
 from django.utils import timezone
-from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view
 from rest_framework import status
 from rest_framework.response import Response
@@ -11,13 +9,16 @@ from icecream import ic
 
 from .models import City, Weather
 from .serializers import CitySerializer, WeatherSerializer
-from .weatherstackapi import clean_current_weather, raw_current_weather
+from .weatherstackapi import clean_current_weather
 
 from django.core.cache import cache
 
 
 @api_view(['GET'])
 def city_list(request, format=None):
+    '''
+
+    '''
     if request.method == 'GET':
         city_objects_list = cache_or_db(City.objects.all, 'city_objects_list')
         serializer = CitySerializer(city_objects_list, many=True)
