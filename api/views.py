@@ -1,4 +1,6 @@
 from datetime import timedelta
+from django.http.response import JsonResponse
+from django.template.defaultfilters import safe
 
 from django.utils import timezone
 from rest_framework.decorators import api_view
@@ -9,7 +11,7 @@ from icecream import ic
 
 from .models import City, Weather
 from .serializers import CitySerializer, WeatherSerializer
-from .weatherstackapi import clean_current_weather
+from .weatherstackapi import clean_current_weather , IncorrectCityName
 
 from django.core.cache import cache
 
@@ -59,7 +61,18 @@ def city_weather_detail(request, pk, format=None):
             return Response(status=status.HTTP_404_NOT_FOUND)
         except Weather.DoesNotExist:
             ic('weather dose not exist')
-            get_weather = clean_current_weather(city.name)
+            try:
+                get_weather = clean_current_weather(city.name)
+            except IncorrectCityName:
+                return Response(
+                    data= {
+                        'error' : {
+                            'code': 1 , 
+                            'message' : 'You Must Enter Correct City Name'
+                        }
+                    },
+                    status= status.HTTP_400_BAD_REQUEST
+                )
             new_Weather_obj = Weather.objects.create(
                 city=city,  # Foreign Key For Relationship
                 **get_weather
